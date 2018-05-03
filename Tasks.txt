@@ -1,0 +1,36 @@
+Network Metrics:
+  - Diameter
+  - Average Path Length
+  - Clustering Coefficient
+  - Centrality
+    * Closeness
+    * Betweeness
+    * Degree
+    * Eigenvector
+  - Conductance
+
+Metrics we will actually do:
+  - Conductance
+  - Clustering Coefficient
+  - Some type of centrality (degree? closeness/avg path length?)
+
+Felipe:
+  * Conductance
+
+Bryson:
+  * Clustering Coefficient
+
+Alex:
+  * Avg Path Length 
+  * Closeness Centrality
+
+
+Next Meeting Monday
+  - Have something done
+
+Network Representation:
+  - Numpy double array
+
+
+
+
