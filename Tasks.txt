@@ -23,6 +23,7 @@ Bryson:
 Alex:
   * Avg Path Length 
   * Closeness Centrality
+  * Diameter
 
 
 Next Meeting Monday
