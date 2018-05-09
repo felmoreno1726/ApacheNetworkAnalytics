@@ -17,15 +17,13 @@ class Metric(object):
         degrees_frame = self.graphframes.inDegrees
 
         # caculate the number of triangles, x3
-        num_triangles = 0
-        for row in num_triangles_frame.collect():
-            num_triangles += row.asDict()["count"] 
+        row_triangles = num_triangles_frame.agg({"count":"sum"}).collect()[0]
+        num_triangles = row_triangles.asDict()['sum(count)']
 
         # calculate the number of triples
-        num_triples = 0
-        for row in degrees_frame.collect():
-            d = row.asDict()["inDegree"]
-            num_triples += d*(d-1)/2
+        degrees_frame = degrees_frame.withColumn("triples", degrees_frame.inDegree*(degrees_frame.inDegree-1)/2.0)
+        row_triples = degrees_frame.agg({"triples":"sum"}).collect()[0]
+        num_triples = row_triples.asDict()['sum(triples)']
 
         return 1.0*num_triangles/num_triples
 
@@ -59,6 +57,7 @@ class Metric(object):
 
         return closeness_dict
 
+<<<<<<< HEAD
 conf = SparkConf().setMaster("local").setAppName("Load Facebook Network")
 sc = SparkContext(conf = conf)
 sqlContext = sql.SQLContext(sc)
@@ -118,3 +117,5 @@ metric = Metric(v, e)
 #for row in rows:
 #    print(row.asDict()["name"])
 #    print(row.asDict()["count"])
+=======
+>>>>>>> f8277892fe097ea2b9ab97b90f221815afe3ab64
