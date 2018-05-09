@@ -1,6 +1,6 @@
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import Row, SQLContext  
-import Metric
+from Metric import *
 
 def get_v(parts):
     #first column person
@@ -17,13 +17,13 @@ def get_v(parts):
 
 def get_e(parts):
     # map stream to columns
-    peopleForward = parts.map(lambda p: Row(id1=p[0], id2=p[1]))
-    peopleBackward = parts.map(lambda p: Row(id1=p[1], id2=p[0]))
+    peopleForward = parts.map(lambda p: Row(src=p[0], dst=p[1]))
+    peopleBackward = parts.map(lambda p: Row(src=p[1], dst=p[0]))
     # dataFrame object of directed friendship relations
     forwardFriendship = sqlContext.createDataFrame(peopleForward)
     backwardFriendship = sqlContext.createDataFrame(peopleBackward)
     # undirected friendship dataFrame
-    friendships = forwardFriendship.join(backwardFriendship, ["id1", "id2"], "outer")
+    friendships = forwardFriendship.join(backwardFriendship, ["src", "dst"], "outer")
     #friendships.show()
     return friendships
 
@@ -42,3 +42,5 @@ V = get_v(parts)
 E = get_e(parts)
 #run metrics on the graph
 met_obj = Metric(V, E)
+
+print(met_obj.overall_clustering_coefficient())
