@@ -118,5 +118,3 @@ metric = Metric(v, e)
 #for row in rows:
 #    print(row.asDict()["name"])
 #    print(row.asDict()["count"])
-
-

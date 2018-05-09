@@ -1,6 +1,6 @@
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import Row, SQLContext  
-import Metric
+from Metric import *
 
 def get_v(parts):
     #first column person
