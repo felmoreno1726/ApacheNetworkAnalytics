@@ -5,10 +5,11 @@ from graphframes import *
 from pyspark import SparkContext, SparkConf, sql
 
 class Metric(object):
-    def __init__(self, vertices, edges):
+    def __init__(self, vertices, edges, sqlContext):
         self.graphframes = GraphFrame(vertices, edges)
         self.vertices = [row.asDict()["id"] for row in vertices.collect()]
         self.shortest_paths = self.graphframes.shortestPaths(landmarks=self.vertices)
+	self.sqlContext = sqlContext
 
     def overall_clustering_coefficient(self):
         # import frames containing num_triangles
@@ -17,14 +18,14 @@ class Metric(object):
         degrees_frame = self.graphframes.inDegrees
 
         # caculate the number of triangles, x3
-        row_triangles = num_triangles_frame.agg({"count":"sum"}).collect()[0]
-        num_triangles = row_triangles.asDict()['sum(count)']
-
+	
+        #row_triangles = num_triangles_frame.agg({"count":"sum"}).collect()[0]
+        #num_triangles = row_triangles.asDict()['sum(count)']
+	num_triangles = self.sqlContext.sql("SELECT SUM(count) FROM num_triangles_frame")
         # calculate the number of triples
         degrees_frame = degrees_frame.withColumn("triples", degrees_frame.inDegree*(degrees_frame.inDegree-1)/2.0)
         row_triples = degrees_frame.agg({"triples":"sum"}).collect()[0]
         num_triples = row_triples.asDict()['sum(triples)']
-
         return 1.0*num_triangles/num_triples
 
     def diameter(self):
@@ -40,9 +41,7 @@ class Metric(object):
         for row in self.shortest_paths.collect():
             dictionary = row.asDict()["distances"]
             sum_d += sum(dictionary.values())
-
         n = len(self.vertices)
-
         return 1.0*sum_d/(n*(n-1))
 
     def closeness_centrality(self):
@@ -54,68 +53,4 @@ class Metric(object):
             n = len(self.vertices)
             ci = 1.0*(n-1)/sum_d
             closeness_dict[v] = ci
-
         return closeness_dict
-
-<<<<<<< HEAD
-conf = SparkConf().setMaster("local").setAppName("Load Facebook Network")
-sc = SparkContext(conf = conf)
-sqlContext = sql.SQLContext(sc)
-
-v = sql.SQLContext.createDataFrame(sqlContext, [
-    ("1", "1"),
-    ("2", "2"),
-    ("3", "3"),
-    ("4", "4"),
-    ("5", "5")], ["id", "name"])
-
-#vertices = sql.SQLContext.createDataFrame(sqlContext, [
-#  ("a", "Alice", 34),
-#  ("b", "Bob", 36),
-#  ("c", "Charlie", 30),
-#  ("d", "David", 29),
-#  ("e", "Esther", 32),
-#  ("f", "Fanny", 36),
-#  ("g", "Gabby", 60)], ["id", "name", "age"])
-#
-#edges = sql.SQLContext.createDataFrame(sqlContext, [
-#  ("a", "b", "friend"),
-#  ("b", "c", "follow"),
-#  ("c", "b", "follow"),
-#  ("f", "c", "follow"),
-#  ("e", "f", "follow"),
-#  ("e", "d", "friend"),
-#  ("d", "a", "friend"),
-#  ("a", "e", "friend")
-#], ["src", "dst", "relationship"])
-
-#v = sql.SQLContext.createDataFrame(sqlContext, [
-#    ("a", "Alice", "2""4"),
-#    ("b", "Bob", "2""4"),
-#    ("c", "Charlie", "2""4"),
-#    ], ["id", "name", "age"])
-
-edges = [("1","2"),("2","1"),("1","4"),("4","1"),("2","3"),("3","2"),("2","4"),("4","2"),("2","5"),("5","2"),("3","5"),("5","3")]
-e = sql.SQLContext.createDataFrame(sqlContext, edges, ["src", "dst"])
-
-metric = Metric(v, e)
-#metric.overall_clustering_coefficient()
-#metric.diameter()
-#print(metric.average_path_length())
-#print(metric.closeness_centrality())
-
-#e = sql.SQLContext.createDataFrame(sqlContext, [
-#  ("a", "b", "friend"),
-#  ("b", "c", "follow"),
-#  ("c", "b", "follow"),
-#], ["src", "dst", "relationship"])
-
-#g = GraphFrame(vertices, edges)
-#
-#results = g.triangleCount()
-#rows = results.collect()
-#for row in rows:
-#    print(row.asDict()["name"])
-#    print(row.asDict()["count"])
-=======
->>>>>>> f8277892fe097ea2b9ab97b90f221815afe3ab64

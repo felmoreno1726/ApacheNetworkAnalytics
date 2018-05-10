@@ -31,7 +31,7 @@ def get_e(parts):
 conf = SparkConf().setMaster("local").setAppName("Load Facebook Network")
 sc = SparkContext(conf = conf)
 sqlContext = SQLContext(sc)
-path = "./network-examples/socfb-American75.mtx"
+path = "./network-examples/example.txt"
 textFile = sc.textFile(path)
 # Stream text file
 lines = sc.textFile(path)
@@ -41,5 +41,5 @@ V = get_v(parts)
 # edges dataframe
 E = get_e(parts)
 #run metrics on the graph
-met_obj = Metric(V, E)
+met_obj = Metric(V, E, sqlContext)
 print(met_obj.overall_clustering_coefficient())
