@@ -1,6 +1,7 @@
 from pyspark import SparkContext, SparkConf
 from pyspark.sql import Row, SQLContext  
 from Metric import *
+import time
 
 def get_v(parts):
     #first column person
@@ -25,21 +26,53 @@ def get_e(parts):
     # undirected friendship dataFrame
     friendships = forwardFriendship.join(backwardFriendship, ["src", "dst"], "outer")
     #friendships.show()
-    return friendships
+    return friendships.distinct()
 
 # this class takes in a text file representing a network and parses it into a graphframe representation
 conf = SparkConf().setMaster("local").setAppName("Load Facebook Network")
 sc = SparkContext(conf = conf)
 sqlContext = SQLContext(sc)
-path = "./network-examples/example.txt"
+path = "./network-examples/example.txt"#REPLACE path with American, MIT, and Harvard friendship networks
 textFile = sc.textFile(path)
 # Stream text file
 lines = sc.textFile(path)
 parts = lines.map(lambda l: l.split(" "))
 # vertices dataframe
+time_before_v = time.clock()
 V = get_v(parts)
+time_after_v = time.clock()
+print("vertices dataframe build time: ", time_after_v - time_before_v)
 # edges dataframe
+time_before_e = time.clock()
 E = get_e(parts)
-#run metrics on the graph
+time_after_e = time.clock()
+print("edges dataframe build time: ", time_after_e - time_before_e)
+#metric
+time_before_metric_obj = time.clock()
 met_obj = Metric(V, E, sqlContext)
-print(met_obj.overall_clustering_coefficient())
+time_after_metric_obj = time.clock()
+print("metric object build time: ", time_after_metric_obj - time_before_metric_obj)
+
+#clustering
+time_before_clustering_coefficient = time.clock()
+print("clustering coefficient: ", met_obj.overall_clustering_coefficient())
+time_after_clustering_coefficient = time.clock()
+print("clustering coefficient computation time: ", time_after_clustering_coefficient - time_before_clustering_coefficient)
+
+#diameter
+time_before_diameter = time.clock()
+print(met_obj.diameter())
+time_after_diameter = time.clock()
+print("diameter computation time: ", time_after_diameter - time_before_diameter)
+
+#average_path_length
+time_before_path = time.clock()
+print("average path length: ", met_obj.average_path_length())
+time_after_path = time.clock()
+print("avg path length computation time: ", time_after_path - time_before_path)
+
+#closenes_centrality
+time_before_centrality = time.clock()
+print("closeness centrality: ", met_obj.closeness_centrality())
+time_after_centrality = time.clock()
+print("closeness centrality computation time: ", time_after_centrality - time_before_centrality)

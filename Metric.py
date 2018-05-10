@@ -3,6 +3,7 @@ from pyspark.sql import SparkSession
 import pyspark
 from graphframes import *
 from pyspark import SparkContext, SparkConf, sql
+from pyspark.sql import functions
 
 class Metric(object):
     def __init__(self, vertices, edges, sqlContext):
@@ -16,12 +17,10 @@ class Metric(object):
         num_triangles_frame = self.graphframes.triangleCount()
         # import frames containing degrees
         degrees_frame = self.graphframes.inDegrees
-
         # caculate the number of triangles, x3
 	
-        #row_triangles = num_triangles_frame.agg({"count":"sum"}).collect()[0]
-        #num_triangles = row_triangles.asDict()['sum(count)']
-	num_triangles = self.sqlContext.sql("SELECT SUM(count) FROM num_triangles_frame")
+        row_triangles = num_triangles_frame.agg({"count":"sum"}).collect()[0]
+        num_triangles = row_triangles.asDict()['sum(count)']
         # calculate the number of triples
         degrees_frame = degrees_frame.withColumn("triples", degrees_frame.inDegree*(degrees_frame.inDegree-1)/2.0)
         row_triples = degrees_frame.agg({"triples":"sum"}).collect()[0]
