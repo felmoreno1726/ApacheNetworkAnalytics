@@ -32,7 +32,7 @@ def get_e(parts):
 conf = SparkConf().setMaster("local").setAppName("Load Facebook Network")
 sc = SparkContext(conf = conf)
 sqlContext = SQLContext(sc)
-path = "./network-examples/example.txt"#REPLACE path with American, MIT, and Harvard friendship networks
+path = "./network-examples/socfb-MIT.mtx"#REPLACE path with American, MIT, and Harvard friendship networks
 textFile = sc.textFile(path)
 # Stream text file
 lines = sc.textFile(path)
@@ -40,11 +40,13 @@ parts = lines.map(lambda l: l.split(" "))
 # vertices dataframe
 time_before_v = time.clock()
 V = get_v(parts)
+print("number of vertices: ", V.count())
 time_after_v = time.clock()
 print("vertices dataframe build time: ", time_after_v - time_before_v)
 # edges dataframe
 time_before_e = time.clock()
 E = get_e(parts)
+print("number of edges: ", E.count())
 time_after_e = time.clock()
 print("edges dataframe build time: ", time_after_e - time_before_e)
 #metric
@@ -52,7 +54,6 @@ time_before_metric_obj = time.clock()
 met_obj = Metric(V, E, sqlContext)
 time_after_metric_obj = time.clock()
 print("metric object build time: ", time_after_metric_obj - time_before_metric_obj)
-
 #clustering
 time_before_clustering_coefficient = time.clock()
 print("clustering coefficient: ", met_obj.overall_clustering_coefficient())
